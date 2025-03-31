@@ -22,11 +22,17 @@ public class PlayerRecordServiceImpl implements PlayerRecordService {
 
     @Override
     public void insertMatchHistory(Player firstPlayer, Player secondPlayer, Long winnerId) {
-        // Determine the loser based on the winner
-        Long loserId = firstPlayer.getId().equals(winnerId) ? secondPlayer.getId() : firstPlayer.getId();
+        if (winnerId != null) {
+            // Determine the loser based on the winner
+            Long loserId = firstPlayer.getId().equals(winnerId) ? secondPlayer.getId() : firstPlayer.getId();
 
-        // Save records for both players
-        playerRecordRepository.save(new PlayerRecord(loserId, winnerId, false)); // Loser record
-        playerRecordRepository.save(new PlayerRecord(winnerId, loserId, true)); // Winner record
+            // Save win/loss records
+            playerRecordRepository.save(new PlayerRecord(loserId, winnerId, false)); // Loser record
+            playerRecordRepository.save(new PlayerRecord(winnerId, loserId, true)); // Winner record
+        } else {
+            // Save draw records (both players get a non-winning record)
+            playerRecordRepository.save(new PlayerRecord(firstPlayer.getId(), secondPlayer.getId(), false));
+            playerRecordRepository.save(new PlayerRecord(secondPlayer.getId(), firstPlayer.getId(), false));
+        }
     }
 }

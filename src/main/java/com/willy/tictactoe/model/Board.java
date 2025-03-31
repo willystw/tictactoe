@@ -41,6 +41,10 @@ public class Board {
     @Setter
     private int turn;
 
+    @Column(name = "space_left")
+    @Setter
+    private int spaceLeft;
+
     @CreationTimestamp
     @Column(name = "created_timestamp")
     private Instant createdTimestamp;
@@ -64,6 +68,7 @@ public class Board {
         this.size = size;
         this.board = new char[size][size];
         this.turn = 1;
+        this.spaceLeft = size * size;
 
         for (char[] boardValue : board) {
             Arrays.fill(boardValue, DELIMITER);
