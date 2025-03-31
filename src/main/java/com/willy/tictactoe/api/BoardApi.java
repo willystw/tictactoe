@@ -107,7 +107,7 @@ public class BoardApi {
     }
 
     private BoardResponse toResponse(Board board) {
-        return new BoardResponse(board.getId(), board.getBoard(), board.getTurn());
+        return new BoardResponse(board.getId(), board.getBoard());
     }
 
     private boolean isPlayerTurn(Player player, int turn, Game game) {

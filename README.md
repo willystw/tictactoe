@@ -64,7 +64,6 @@ curl --request POST \
   --header 'x-user-id: 1' \
   --data '{
   "row": "0",
-  "col": "3",
-  "symbol": "O"
+  "col": "3"
 }'
 ```

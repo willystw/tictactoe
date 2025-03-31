@@ -17,7 +17,4 @@ public class BoardResponse {
 
     @JsonProperty("board")
     private char[][] board;
-
-    @JsonProperty("turn")
-    private int turn;
 }
