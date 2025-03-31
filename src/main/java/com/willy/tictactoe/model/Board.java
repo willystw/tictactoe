@@ -71,7 +71,7 @@ public class Board {
     }
 
     public boolean move(int row, int column, char symbol) {
-        if (row >= 0 && column >= 0 && row < size && column < size && board[row][column] == DELIMITER) {
+        if (isValidPosition(row, column) && board[row][column] == DELIMITER) {
             board[row][column] = symbol;
             return true;
         }
