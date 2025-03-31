@@ -94,7 +94,12 @@ public class BoardApi {
             gameService.saveGameData(game);
             boardService.saveBoardData(board);
 
-            log.info("[action=MAKE_MOVEMENT] [playerId={}] [gameId={}] Player made a movement", userId, boardID);
+            log.info(
+                    "[action=MAKE_MOVEMENT] [playerId={}] [gameId={}] Player made a movement on row {} column {}",
+                    userId,
+                    boardID,
+                    request.getRow(),
+                    request.getCol());
             return ResponseEntity.ok(new MakeMovementResponse(
                     toResponse(board), true, game.getIsFinished() != null ? game.getIsFinished() : false));
         } else {
@@ -119,12 +124,16 @@ public class BoardApi {
         int currentTurn = board.getTurn();
         board.setTurn(currentTurn == 1 ? 2 : 1); // Switch turns
 
+        board.setSpaceLeft(board.getSpaceLeft() - 1);
         if (board.isWinState(request.getRow(), request.getCol())) {
             game.setIsFinished(true);
             game.setWinner(currentTurn == 1 ? game.getPlayerOne() : game.getPlayerTwo());
 
             playerRecordService.insertMatchHistory(
                     game.getPlayerOne(), game.getPlayerTwo(), game.getWinner().getId());
+        } else if (board.getSpaceLeft() == 0) {
+            game.setIsFinished(true);
+            playerRecordService.insertMatchHistory(game.getPlayerOne(), game.getPlayerTwo(), null);
         }
     }
 }
