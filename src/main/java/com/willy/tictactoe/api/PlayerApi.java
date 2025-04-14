@@ -44,14 +44,20 @@ public class PlayerApi {
         String username = createPlayerRequest.getUsername().trim().toLowerCase();
 
         if (playerService.isUsernameExists(username)) {
-            log.warn(
-                    "[action=CREATE_PLAYER] [username={}] Unable to create new player | Cause: username already exists",
-                    username);
+            log.atWarn()
+                    .addKeyValue("action", "CREATE_PLAYER")
+                    .addKeyValue("username", username)
+                    .setMessage("Unable to create new player | Cause: username already exists")
+                    .log();
             return ResponseEntity.badRequest().build();
         }
 
         Player p = playerService.createNewPlayer(username);
-        log.info("[action=CREATE_PLAYER] [playerId={}] Player created", p.getId());
+        log.atInfo()
+                .addKeyValue("action", "CREATE_PLAYER")
+                .addKeyValue("player_id", p.getId())
+                .setMessage("Player created")
+                .log();
         return ResponseEntity.ok(toPlayerResponse(p));
     }
 

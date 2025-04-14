@@ -38,7 +38,11 @@ public class GameApi {
     public ResponseEntity<GameResponse> getGameData(@PathVariable Long gameId) {
         Game game = gameService.getById(gameId);
         if (game == null) {
-            log.warn("[action=GET_GAME] [gameId={}] Unable to view a game  | Cause: Invalid game ID", gameId);
+            log.atWarn()
+                    .addKeyValue("action", "GET_GAME")
+                    .addKeyValue("game_id", gameId)
+                    .setMessage("Unable to view a game  | Cause: Invalid game ID")
+                    .log();
             return ResponseEntity.notFound().build();
         }
 
@@ -51,7 +55,11 @@ public class GameApi {
         Player firstPlayer = playerService.findById(userId);
 
         if (firstPlayer == null) {
-            log.warn("[action=CREATE_GAME] [playerId={}] Unable to create a game  | Cause: Invalid player ID", userId);
+            log.atWarn()
+                    .addKeyValue("action", "CREATE_GAME")
+                    .addKeyValue("player_id", userId)
+                    .setMessage("Unable to create a game  | Cause: Invalid player ID")
+                    .log();
             return ResponseEntity.notFound().build();
         }
 
@@ -66,7 +74,12 @@ public class GameApi {
         boardService.saveBoardData(board);
         gameData = gameService.saveGameData(gameData);
 
-        log.info("[action=CREATE_GAME] [playerId={}] [gameId={}] New game created ", userId, gameData.getId());
+        log.atInfo()
+                .addKeyValue("action", "CREATE_GAME")
+                .addKeyValue("player_id", userId)
+                .addKeyValue("game_id", gameData.getId())
+                .setMessage("New game created")
+                .log();
         return ResponseEntity.ok(toGameResponse(gameData));
     }
 
@@ -76,33 +89,41 @@ public class GameApi {
         Player playerData = playerService.findById(userId);
 
         if (playerData == null) {
-            log.warn(
-                    "[action=JOIN_GAME] [playerId={}] [gameId={}] Unable to join a game | Cause: Invalid player ID",
-                    userId,
-                    joinGameRequest.getGameId());
+            log.atWarn()
+                    .addKeyValue("action", "JOIN_GAME")
+                    .addKeyValue("player_id", userId)
+                    .addKeyValue("game_id", joinGameRequest.getGameId())
+                    .setMessage("Unable to join a game | Cause: Invalid player ID")
+                    .log();
             return ResponseEntity.notFound().build();
         }
 
         Game gameData = gameService.getById(joinGameRequest.getGameId());
         if (gameData == null) {
-            log.warn(
-                    "[action=JOIN_GAME] [gameId={}] [playerId={}] Unable to join a game | Cause: Invalid game ID",
-                    joinGameRequest.getGameId(),
-                    userId);
+            log.atWarn()
+                    .addKeyValue("action", "JOIN_GAME")
+                    .addKeyValue("player_id", userId)
+                    .addKeyValue("game_id", joinGameRequest.getGameId())
+                    .setMessage("Unable to join a game | Cause: Invalid game ID")
+                    .log();
             return ResponseEntity.notFound().build();
         }
         if (gameData.getPlayerTwo() != null || gameData.getPlayerOne().getId().equals(userId)) {
-            log.warn(
-                    "[action=JOIN_GAME] [gameId={}] [playerId={}] Unable to join a game | Cause: Invalid second player data",
-                    joinGameRequest.getGameId(),
-                    userId);
+            log.atWarn()
+                    .addKeyValue("action", "JOIN_GAME")
+                    .addKeyValue("player_id", userId)
+                    .addKeyValue("game_id", joinGameRequest.getGameId())
+                    .setMessage("Unable to join a game | Cause: Invalid second player data")
+                    .log();
             return ResponseEntity.badRequest().build();
         }
         if (gameData.getIsFinished() == Boolean.TRUE) {
-            log.warn(
-                    "[action=JOIN_GAME] [gameId={}] [playerId={}] Unable to join a game | Cause: game already finished",
-                    joinGameRequest.getGameId(),
-                    userId);
+            log.atWarn()
+                    .addKeyValue("action", "JOIN_GAME")
+                    .addKeyValue("player_id", userId)
+                    .addKeyValue("game_id", joinGameRequest.getGameId())
+                    .setMessage("Unable to join a game | Cause: game already finished")
+                    .log();
             return ResponseEntity.badRequest().build();
         }
 
@@ -110,7 +131,12 @@ public class GameApi {
         gameData.setIsStarted(true);
 
         gameData = gameService.saveGameData(gameData);
-        log.info("[action=JOIN_GAME] [playerId={}] [gameId={}] Player joined a game", userId, gameData.getId());
+        log.atInfo()
+                .addKeyValue("action", "JOIN_GAME")
+                .addKeyValue("player_id", userId)
+                .addKeyValue("game_id", joinGameRequest.getGameId())
+                .setMessage("Player joined a game")
+                .log();
         return ResponseEntity.ok(toGameResponse(gameData));
     }
 
@@ -120,36 +146,44 @@ public class GameApi {
         Player surrenderPlayerData = playerService.findById(userId);
 
         if (surrenderPlayerData == null) {
-            log.warn(
-                    "[action=QUIT_GAME] [playerId={}] [gameId={}] Player ID not found  | Cause: Invalid player ID",
-                    userId,
-                    quitGameRequest.getGameId());
+            log.atWarn()
+                    .addKeyValue("action", "QUIT_GAME")
+                    .addKeyValue("player_id", userId)
+                    .addKeyValue("game_id", quitGameRequest.getGameId())
+                    .setMessage("Player ID not found | Cause: Invalid player ID")
+                    .log();
             return ResponseEntity.notFound().build();
         }
 
         Game gameData = gameService.getById(quitGameRequest.getGameId());
         if (gameData == null) {
-            log.warn(
-                    "[action=QUIT_GAME] [gameId={}] [playerId={}] Game ID not found  | Cause: Invalid game ID",
-                    quitGameRequest.getGameId(),
-                    userId);
+            log.atWarn()
+                    .addKeyValue("action", "QUIT_GAME")
+                    .addKeyValue("game_id", quitGameRequest.getGameId())
+                    .addKeyValue("player_id", userId)
+                    .setMessage("Game ID not found | Cause: Invalid game ID")
+                    .log();
             return ResponseEntity.notFound().build();
         }
 
         if (Boolean.TRUE.equals(gameData.getIsFinished()) || Boolean.FALSE.equals(gameData.getIsStarted())) {
-            log.warn(
-                    "[action=QUIT_GAME] [gameId={}] [playerId={}] Unable to quit a game  | Cause: Invalid game state",
-                    quitGameRequest.getGameId(),
-                    userId);
+            log.atWarn()
+                    .addKeyValue("action", "QUIT_GAME")
+                    .addKeyValue("game_id", quitGameRequest.getGameId())
+                    .addKeyValue("player_id", userId)
+                    .setMessage("Unable to quit a game | Cause: Invalid game state")
+                    .log();
             return ResponseEntity.badRequest().build();
         }
 
         if (!gameData.getPlayerOne().getId().equals(userId)
                 && !gameData.getPlayerTwo().getId().equals(userId)) {
-            log.warn(
-                    "[action=QUIT_GAME] [gameId={}] [playerId={}] Unable to quit game | Cause: Invalid player ID",
-                    quitGameRequest.getGameId(),
-                    userId);
+            log.atWarn()
+                    .addKeyValue("action", "QUIT_GAME")
+                    .addKeyValue("game_id", quitGameRequest.getGameId())
+                    .addKeyValue("player_id", userId)
+                    .setMessage("Unable to quit game | Cause: Invalid player ID")
+                    .log();
             return ResponseEntity.badRequest().build();
         }
 
@@ -168,10 +202,12 @@ public class GameApi {
                     gameData.getPlayerTwo(),
                     gameData.getWinner().getId());
         }
-        log.info(
-                "[action=QUIT_GAME] [playerId={}] [gameId={}] Player exited a game ",
-                userId,
-                quitGameRequest.getGameId());
+        log.atInfo()
+                .addKeyValue("action", "QUIT_GAME")
+                .addKeyValue("player_id", userId)
+                .addKeyValue("game_id", quitGameRequest.getGameId())
+                .setMessage("Player exited a game")
+                .log();
         return ResponseEntity.ok(toGameResponse(gameData));
     }
 

@@ -42,11 +42,14 @@ public class BoardApi {
     public ResponseEntity<BoardResponse> getBoardData(@PathVariable Long id) {
         Game game = gameService.getById(id);
         if (game == null) {
-            log.warn("[action=GET_BOARD] [gameId={}] Invalid movement | Cause: Game data can not be found", id);
+            log.atWarn()
+                    .addKeyValue("action", "GET_BOARD")
+                    .addKeyValue("game_id", id)
+                    .setMessage("Invalid game data | Cause: Game data can not be found")
+                    .log();
             return ResponseEntity.notFound().build();
         }
         Board board = game.getBoard();
-
         return ResponseEntity.ok().body(toResponse(board));
     }
 
@@ -60,18 +63,23 @@ public class BoardApi {
 
         Game game = gameService.getById(boardID);
         if (game == null || board == null) {
-            log.warn(
-                    "[action=MAKE_MOVEMENT] [playerId={}] [gameId={}] Invalid movement | Cause: Game data can not be found",
-                    userId,
-                    boardID);
+            log.atWarn()
+                    .addKeyValue("action", "MAKE_MOVEMENT")
+                    .addKeyValue("player_id", userId)
+                    .addKeyValue("game_id", boardID)
+                    .setMessage("Invalid movement | Cause: Game data can not be found")
+                    .log();
             return ResponseEntity.notFound().build();
         }
 
         if (game.getIsStarted() == Boolean.FALSE || game.getIsFinished() == Boolean.TRUE) {
-            log.warn(
-                    "[action=MAKE_MOVEMENT] [playerId={}] [gameId={}] Invalid movement | Cause: Invalid game state",
-                    userId,
-                    boardID);
+            log.atWarn()
+                    .addKeyValue("action", "MAKE_MOVEMENT")
+                    .addKeyValue("player_id", userId)
+                    .addKeyValue("game_id", boardID)
+                    .setMessage("Invalid movement | Cause: Invalid game state")
+                    .log();
+
             return ResponseEntity.badRequest().build();
         }
 
@@ -82,10 +90,13 @@ public class BoardApi {
             char symbol = turn == 1 ? FIRST_PLAYER_SYMBOL : SECOND_PLAYER_SYMBOL;
             boolean successMove = board.move(request.getRow(), request.getCol(), symbol);
             if (!successMove) {
-                log.info(
-                        "[action=MAKE_MOVEMENT] [playerId={}] [gameId={}] Player failed to make a movement | Cause: Invalid input or replacing existing symbol",
-                        userId,
-                        boardID);
+                log.atInfo()
+                        .addKeyValue("action", "MAKE_MOVEMENT")
+                        .addKeyValue("player_id", userId)
+                        .addKeyValue("game_id", boardID)
+                        .setMessage(
+                                "Player failed to make a movement | Cause: Invalid input or replacing existing symbol")
+                        .log();
                 return ResponseEntity.ok(new MakeMovementResponse(toResponse(board), false, false));
             }
 
@@ -94,19 +105,23 @@ public class BoardApi {
             gameService.saveGameData(game);
             boardService.saveBoardData(board);
 
-            log.info(
-                    "[action=MAKE_MOVEMENT] [playerId={}] [gameId={}] Player made a movement on row {} column {}",
-                    userId,
-                    boardID,
-                    request.getRow(),
-                    request.getCol());
+            log.atInfo()
+                    .addKeyValue("action", "MAKE_MOVEMENT")
+                    .addKeyValue("player_id", userId)
+                    .addKeyValue("game_id", boardID)
+                    .setMessage(String.format(
+                            "Player made a movement on row %d column %d", request.getRow(), request.getCol()))
+                    .log();
+
             return ResponseEntity.ok(new MakeMovementResponse(
                     toResponse(board), true, game.getIsFinished() != null ? game.getIsFinished() : false));
         } else {
-            log.warn(
-                    "[action=MAKE_MOVEMENT] [playerId={}] [gameId={}] Invalid movement | Cause: Invalid player turn",
-                    userId,
-                    boardID);
+            log.atWarn()
+                    .addKeyValue("action", "MAKE_MOVEMENT")
+                    .addKeyValue("player_id", userId)
+                    .addKeyValue("game_id", boardID)
+                    .setMessage("Invalid movement | Cause: Invalid player turn")
+                    .log();
             return ResponseEntity.badRequest().build();
         }
     }
